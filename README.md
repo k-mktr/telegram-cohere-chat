@@ -9,6 +9,7 @@ A simple Telegram bot leveraging the power of Cohere API for intelligent convers
 - 📜 **Chat History Management**: Improved context through conversation tracking
 - 🔍 **Web Search Capability**: Provide relevant web information on demand
 - 🔐 **User Authentication**: Ensure only authorized users can interact with the bot
+- 👥 **Group Chat Support**: Interact with the bot in group chats by mentioning it
 
 ## 🚀 Getting Started
 
@@ -17,6 +18,15 @@ A simple Telegram bot leveraging the power of Cohere API for intelligent convers
 - Python 3.7+
 - Telegram Bot Token
 - Cohere API Key
+
+### Bot Configuration
+
+1. Enable group privacy mode for your bot via BotFather:
+   - Send `/setprivacy` to @BotFather
+   - Select your bot
+   - Choose 'Enable' to allow the bot to respond to messages in groups
+
+2. Add the bot to your group and grant it admin rights for full functionality.
 
 ### Installation
 
@@ -32,7 +42,7 @@ A simple Telegram bot leveraging the power of Cohere API for intelligent convers
    ```
 
 3. Set up configuration:
-   - Fill in your Telegram Bot Token, Cohere API Key, and Allowed User ID in `cohere_config.py`
+   - Fill in your Telegram Bot Token, Cohere API Key, Allowed User IDs, and Allowed Group IDs in `cohere_config.py`
 
 ## 🎮 Usage
 
@@ -41,7 +51,8 @@ A simple Telegram bot leveraging the power of Cohere API for intelligent convers
    python run.py
    ```
 
-2. Open Telegram and start chatting with your bot!
+2. In private chats, simply send messages to the bot.
+3. In group chats, mention the bot using its username (e.g., @YourBotName) to interact with it.
 
 ## 🛠️ Commands
 

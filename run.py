@@ -33,9 +33,9 @@ def markdown_to_html(text):
         text = re.sub(r'^#{' + str(i) + r'}\s*(.*?)\s*$', r'<b>\1</b>', text, flags=re.MULTILINE)
     return text
 
-def load_chat_history(user_id):
+def load_chat_history(chat_id):
     try:
-        with open(f"chat_history_{user_id}.json", "r") as file:
+        with open(f"chat_history_{chat_id}.json", "r") as file:
             data = file.read().strip()
             if not data:  # Check if the file is empty
                 return []
@@ -43,11 +43,11 @@ def load_chat_history(user_id):
     except FileNotFoundError:
         return []  # Return an empty list if no history file exists
     except json.JSONDecodeError:
-        logging.error(f"Corrupted chat history for user {user_id}. Starting with an empty history.")
+        logging.error(f"Corrupted chat history for user {chat_id}. Starting with an empty history.")
         return []  # Return an empty list if the file is corrupted or contains invalid JSON
 
-def save_chat_history(user_id, chat_history):
-    with open(f"chat_history_{user_id}.json", "w") as file:
+def save_chat_history(chat_id, chat_history):
+    with open(f"chat_history_{chat_id}.json", "w") as file:
         json.dump(chat_history, file, indent=4)
 
 async def start(update: Update, context):
@@ -70,15 +70,31 @@ def safe_split_html(text, max_length=4096):
     return parts
 
 async def handle_message(update: Update, context):
-    user_id = update.message.from_user.id
-    if str(user_id) != config.ALLOWED_USER_ID:
-        await update.message.reply_text("Unauthorized user.")
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    
+    # Check authorization
+    if (str(chat_id) not in config.ALLOWED_GROUP_IDS and 
+        str(user_id) not in config.ALLOWED_USER_IDS):
+        await update.message.reply_text("Unauthorized user or group.")
         return
 
-    input_text = update.message.text
-    chat_history = load_chat_history(user_id)
+    # Check if the message is from a group
+    if update.effective_chat.type in ['group', 'supergroup']:
+        # Check if the bot is mentioned
+        if context.bot.username in update.message.text:
+            # Remove the bot's username from the message
+            input_text = update.message.text.replace(f'@{context.bot.username}', '').strip()
+        else:
+            # If the bot is not mentioned, ignore the message
+            return
+    else:
+        # For private chats, process as before
+        input_text = update.message.text
+
+    chat_history = load_chat_history(chat_id)
     response, sources, updated_history = await generate_response_with_cohere(input_text, chat_history)
-    save_chat_history(user_id, updated_history)
+    save_chat_history(chat_id, updated_history)
 
     await send_response(update, response, sources)
 
